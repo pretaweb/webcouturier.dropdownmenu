@@ -8,14 +8,9 @@
     <five:registerPackage package="." initialize=".initialize" />
 
     <include package="plone.browserlayer" />
-    <include package="Products.CMFCore" file="permissions.zcml"
-             xmlns:zcml="http://namespaces.zope.org/zcml"
-             zcml:condition="have plone-41" />
-
     <include package=".browser" />
 
     <include file="skins.zcml" />
-    <include file="upgrades.zcml" />
 
     <i18n:registerTranslations directory="locales" />
 
@@ -25,7 +20,7 @@
     <genericsetup:registerProfile
         name="default"
         title="Dropdown menu"
-        directory="profiles/default"
+        directory="profiles"
         description="Extension profile for dropdown menu."
         provides="Products.GenericSetup.interfaces.EXTENSION"
         i18n:attributes="title label_gs_default;

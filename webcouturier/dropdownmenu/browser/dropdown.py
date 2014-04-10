@@ -4,7 +4,7 @@ from zope.interface import implements
 
 from plone.app.layout.navigation.interfaces import INavtreeStrategy
 from plone.app.layout.navigation.navtree import buildFolderTree
-from plone.app.layout.navigation.root import getNavigationRoot
+from plone.app.layout.navigation.root import getNavigationRoot, getNavigationRootObject
 
 from Products.CMFPlone.browser.navtree import NavtreeQueryBuilder
 
@@ -33,9 +33,9 @@ class DropdownQueryBuilder(NavtreeQueryBuilder):
         dropdown_properties = getToolByName(
             context, 'portal_properties').dropdown_properties
         dropdown_depth = dropdown_properties.getProperty('dropdown_depth', 3)
-        self.query['path'] = {'query': '/'.join(context.getPhysicalPath()),
-                              'navtree_start': 1,
-                              'depth': dropdown_depth}
+        self.query['path']['depth'] = dropdown_depth
+        if 'navtree' in self.query['path']:
+            del self.query['path']['navtree']
 
 
 class DropdownMenuViewlet(common.GlobalSectionsViewlet):
@@ -65,7 +65,7 @@ class DropdownMenuViewlet(common.GlobalSectionsViewlet):
 
         return ''.join((
             self.selected_portal_tab,
-            get_language(context, self.request),
+            get_language(aq_inner(self.context), self.request),
             str(anonymous),
         ))
 
@@ -111,9 +111,10 @@ class DropdownMenuViewlet(common.GlobalSectionsViewlet):
     recurse = ViewPageTemplateFile('dropdown_recurse.pt')
 
     def update(self):
+        context = self.context
+        portal = getToolByName(context, 'portal_url').getPortalObject()
         common.ViewletBase.update(self)  # Get portal_state and portal_url
         super(DropdownMenuViewlet, self).update()
-        context = aq_inner(self.context)
         portal_props = getToolByName(context, 'portal_properties')
         self.properties = portal_props.navtree_properties
         self.dropdown_properties = portal_props.dropdown_properties
@@ -121,13 +122,10 @@ class DropdownMenuViewlet(common.GlobalSectionsViewlet):
             'enable_caching', False)
         self.enable_parent_clickable = self.dropdown_properties.getProperty(
             'enable_parent_clickable', True)
-        self.navroot_path = getNavigationRoot(context)
-        self.data = Assignment(root=self.navroot_path)
+        self.data = Assignment(root=getNavigationRoot(context))
+        self.root_url=getNavigationRootObject(context, portal).absolute_url()
 
     def getTabObject(self, tabUrl='', tabPath=None):
-        if tabUrl == self.portal_state.navigation_root_url():
-            # We are at the navigation root
-            return ''
         if tabPath is None:
             # get path for current tab's object
             try:
@@ -137,7 +135,7 @@ class DropdownMenuViewlet(common.GlobalSectionsViewlet):
                 # we are in Plone 3.0.x world
                 tabPath = tabUrl.split(self.portal_url)[-1]
 
-            if tabPath == '' or '/view' in tabPath:
+            if tabPath == '' or '/view' in tabPath or tabUrl == self.root_url:
                 # It's either the 'Home' or Image tab. It can't have
                 # any dropdown.
                 return ''
@@ -158,12 +156,6 @@ class DropdownMenuViewlet(common.GlobalSectionsViewlet):
             return ''
 
         portal = self.portal_state.portal()
-        portal_path = '/'.join(portal.getPhysicalPath())
-        # Check to see if we are using a navigation root. If we are
-        # virtual hosting the navigation root as its own domain,
-        # the tabPath is no longer rooted at the main portal.
-        if portal_path != self.navroot_path:
-            portal = portal.restrictedTraverse(self.navroot_path)
         tabObj = portal.restrictedTraverse(tabPath, None)
 
         if tabObj is None:
