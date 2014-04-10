@@ -1,12 +1,10 @@
-webcouturier.dropdownmenu
-=========================
-
 Overview
 --------
 You will get the dropdown menus for those items in global navigation that have
-the subitems. Submenus are built based on the same policy as the Site Map, so
+the subitems. Submenus are build based on the same policy as the Site Map, so
 it will show the same tree as you would get in the Site Map or navigation
-portlet being in appropriate section.
+portlet being in appropriate section. Requires plone.browserlayer to be
+installed in your site.
 
 How it works
 ------------
@@ -26,51 +24,57 @@ How to get it
   buildout will get it for you from PyPi.
 
 If you are not familiar with managing python packages, please read `Packages,
-products and eggs`_ page of the excellent tutorial_ by Martin Aspeli.
+products and eggs`_ page of the great tutorial_ by Martin Aspeli who is much
+more clever than me and don't spam my inbox ;)
 
 .. _Packages, products and eggs: http://plone.org/documentation/tutorial/buildout/packages-products-and-eggs
 .. _tutorial: http://plone.org/documentation/tutorial/buildout
 
 
-Installation
+Requirements
 ------------
 
-Simply activate ``Dropdown menus profile`` in *Site Setup/Add-ons*.
+webcouturier.dropdownmenu requires plone.browserlayer_ package to be
+installed in your site. plone.browserlayer package is shipped with Plone >=
+3.1 and thus you don't need anything extra when you have that version of
+Plone.
 
-Tips
-----
+But for Plone 3.0.x < 3.1 the process looks like this:
 
-- **While disabling clicking the links with children, I want the links in the
-  global navigation bar to be clickable nevertheless.**
+- if you are creating a new Plone site and want it to support dropdown menus,
+  just select 2 extension profiles ``Local browser layer support`` and
+  ``Dropdown menus profile`` in **Extension Profiles** select when adding a
+  new Plone site;
 
-  What you need is to customize the ``browser/dropdown.js`` file like the
-  following:
-  
-  ::
-  
-    jQuery(function ($) {
-        $('#portal-globalnav ul .noClick').click(function (e) {
-            e.preventDefault();
-        });
-    });
-  
-  Note that we have added **ul** in the jQuery selector. This will stop
-  clickability of the links in the dropdowns only, but not the section's link
-  in the global navigation bar itself.
+- if you want to add dropdown menus functionality to already-existing Plone
+  site, you need to apply ``Local browser layer support`` extension profile
+  and then ``Dropdown menus profile``. You can do it either in
+  **portal_setup/Import** or in portal_quickinstaller by simple installation
+  procedure.
+
+In Plone 3.1 you can simply install ``Dropdown menus profile`` in
+portal_quickinstaller without need of prior installation of ``Local browser
+layer support`` (that is not available for installation anyway, since is a
+part of core system).
+
+**IMPORTANT** For Plone 3.0.x you should use plone.browserlayer 1.0.rc3. Be
+sure to define the right version of plone.browserlayer in your buildout.cfg
+(you are using buildout, aren't you? ;)). For Plone 3.1.x just use the version
+you have.
+
+.. _plone.browserlayer: http://pypi.python.org/pypi/plone.browserlayer/1.0b3
 
 
+Copyright and credits
+---------------------
 
-Thanks
+Web Couturier
+Thanks to Wichert Akkerman (`Simplon`_) for help   
+
+
+Author
 ------
 
-Thanks to Wichert Akkerman (`Simplon`_) for the help with original version of the package.
-
-
-Contacts
---------
-
-Twitter_ · `Google+`_
+Denys Mishunov
 
 .. _Simplon: http://www.simplon.biz
-.. _Twitter: http://twitter.com/#!/mishunov
-.. _Google+: https://plus.google.com/102311957553961771735/posts
